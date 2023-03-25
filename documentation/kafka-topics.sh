@@ -1,3 +1,5 @@
+# documentation for the command: kafka-topics.sh 
+
 kafka-topics.sh --bootstrap-server localhost:9092 --topic first_topic --create
 
 kafka-topics.sh --bootstrap-server localhost:9092 --topic first_topic --create --partitions 3
