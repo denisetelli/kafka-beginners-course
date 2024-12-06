@@ -1,0 +1,96 @@
+Kafka for beginners
+Course material from Conduktor 
+
+---- THEORY ----
+TOPICS, PARTITIONS AND OFFSETS
+- Topics: a particular stream of data. 
+	Topics are split in Partitions: messages within each partition are ordered
+- Data stream: sequence of messages
+- Once the data is written to a partition, it cannot be changed (immutability)
+- Data is kept only for a limited time (configurable)
+- Offeset only have a meaning for a specific partition. 
+- Order is guaranteed only within a partition (not a across partitions)
+ 
+PRODUCERS AND MESSAGES KEYS
+- Producers can chose to send a key with the message (string, number, binary, etc)
+	If key=null, data is sent round robin (partition 0, then 1, then 2)
+	If key!=null, the all messages for that key will always go to the same partition (hashing)
+
+CONSUMER AND DESERIALIZATION
+- Consumers read data from a topic (identified by name) - pull model
+- Consumers automatically know which broker to read from
+- In case of broker ailures, consumers know how to recover
+- Data is read in order from low to high offset within partitions
+
+CONSUMER GROUPS AND CONSUMER OFFSETS
+- The serialization/ deserialization type must not change during a topic lifecycle (create a new topic instead)
+- Consumer Offsets: If a consumer dies, it will be able to read back from where it left thanks to the commited consumer offsets
+- The offsets committed are in Kafka topic named "_ _consumer_offsets"
+- By defaulst, Java consumers will automatically commit offsets (at leats once)
+
+BROKERS AND TOPICS
+- A Kafka cluster is composed of multiple brokers (servers), they are called brokers because they receive and send data 
+- Each broker is identified with its ID (integer)
+- Each broker contains certain topic partitions 
+- After connecting to any broker (called a boostrap broker), you will be connected to the entire cluster (Kafka clients have smart mechanics for that)
+- A good number to get started is 3 brokers, but some big clusters have over 100 brokers
+
+TOPIC REPLICATION
+- At any time ONE broker can be a leader for a given partition. The other brokers will replicate the data
+- Producers can olny send data to the broker that is leader of a partition. Therefore, each partition has one leader and multiple ISR (in-sync replica)
+
+ZOOKEEPER
+- Is a software that manages brokers (keeps a list of them)
+- It sends notifications to kafka in case of changes (e.g. new topic, broker dies, broker comes up, delete topics, etc.)
+- Kafka 3.x can work without Zookeeper - using kafka Raft instead
+- Zookeeper by design operates with an odd number of servers (1.3.5.7)
+- Zookeeper has a leader (srites) the rest of the servers are followers (reads)
+
+
+---- INSTALLING KAFKA ----
+Follow the steps in www.conduktor.io/kafka/starting-kafka
+
+Passos para a primeira vez usando o kafka no WSL2:
+	wget https://ftp.wayne.edu/apache/kafka/3.1.0/kafka_2.13-3.1.0.tgz
+	tar -xzf kafka_2.13-3.1.0.tgz
+	cd kafka_2.13-3.1.0
+
+	ir até a pasta /bin do kafka e copiar o caminho (comando 'pwd' quando estiver na pasta /bin)
+	depois, comando 'nano .bashrc' 
+		esse comando é para alterar o path
+		ir até o final do bash e digitar o caminho da sua pasta bin, por exemplo: PATH="$PATH:/home/denise/kafka_2.13-3.1.0/bin
+	fechar o ubuntu, abrir de novo e digitar o comando: echo $PATH
+	deve aparecer um caminho sendo a ultima pasta, a pasta bin do kafka
+	
+	kafka-topics.sh 
+		esse comando deve retornar uma lista de comandos possíveis para o uso do kafka, se tiver ok significa que o command line do kafka está ok
+	
+	See more in https://www.conduktor.io/kafka/how-to-install-apache-kafka-on-windows
+
+
+--- KAFKA JAVA PROGRAMMING ----
+https://www.conduktor.io/kafka/kafka-sdk-list
+
+- In intellij, create a project with an inside project for kafka.
+- In this sub project, in file build.gradle 3 dependencies should be added
+- Download kafka maven (just type it in google) for kakfa-clients (https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients/3.2.1)
+- get other 2 dependencies (in the same website): slf4j api and slf4j simple
+- it will look like this:
+	dependencies {
+    // https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients
+    implementation 'org.apache.kafka:kafka-clients:3.2.1'
+
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
+	}
+
+- in intellij select File > Settings> Build,Execu...> Build tools> Gradle > and then update "Build and run using" for "intellij IDEA"
+ 
+---- MÚLTIPLAS INTÂNCIAS NO INTELLIJ ----
+ao lado do símbolo de build (martelo) no canto superior direito, clicar nome da classe > edit configurations > em 'build and run' clicar em 'modify 'options e selecionar 'allow multiple instances'
+cada vez que rodar, uma nova tab vai abrir no console de 'Run'
+para parar uma delas apenas, clicar no botão a esquerda no console de 'Run': 'Exit' 
+

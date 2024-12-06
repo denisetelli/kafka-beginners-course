@@ -1,0 +1,142 @@
+README 
+Backend application using Kafka services.
+
+This project is a result from a hands-on coding course of Spring + Apache Kafka in microservice.
+It has a publisher and a consumer using Java (Spring Boot) in a Kafka Microservice Architecture.
+The program handle asynchronous data integration among multiple systems using Apache Kafka.
+
+Key concepts:
+- Kafka Stream
+- Kafka REST Proxy
+- Kafka Schema Registry using JSON & AVRO
+- KsqlDB
+
+Required: 
+- Java 17
+- Docker
+
+Steps followed:
+https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html
+
+	1) Create two projects: producer & consumer 
+		At https://start.spring.io/ -> using Gradle and 'Spring for Apache Kafka' dependency
+
+	2) To install docker: 
+		https://docs.docker.com/compose/install/
+		If necessarry, install WSL2:
+		https://docs.microsoft.com/en-us/windows/wsl/install		
+		 
+	3) How to use docker in WSL2 (check the youtube video listed in this post):
+		https://github.com/codeedu/wsl2-docker-quickstart#1---instalar-o-docker-com-docker-engine-docker-nativo
+	
+	4) Dowload kafka
+		https://www.confluent.io/blog/set-up-and-run-kafka-on-windows-linux-wsl-2/
+	
+	5) Stop Kafka
+	   When you’re done experimenting with Kafka, follow these steps to exit the Kafka environment:
+		Stop the consumer and producer clients with Ctrl+C
+		Stop the Kafka broker with Ctrl+C
+		Stop the ZooKeeper server with Ctrl+C
+		Run the following command to clean up:
+		rm -rf /tmp/kafka-logs /tmp/zookeeper
+
+
+Comandos gerais:
+	docker compose
+		O Docker Compose instalado é a versão 2, para executa-lo em vez de docker-compose use docker compose
+	:wq 
+		Aperte a tecla :, digite wq para salvar/sair e pressione enter
+	wsl -l -v
+		para ver as versões de Linux instaladas e seu status atual(parado ou rodando)
+	ls -al
+		lista os arquivos da pasta atual
+	cd /home/denise
+		direciona para a home
+	cd /mnt/c/Users/denis
+		nesta pasta o desempenho é melhor
+	pwd
+		identifica em que pasta se está no momento
+	cd ..
+		sobre uma pasta
+	cd ../../
+		sobe duas pastas
+	ls -al
+		lista os arquivos da pasta em que se está no momento
+	clear
+		limpa a tela
+	wsl --shutdown 
+		Este comando vai desligar todas as instâncias WSL 2 ativas e basta abrir o terminal novamente para usa-la
+	\\wsl.localhost\Ubuntu-20.04\home\denise\kafka_2.13-3.1.0
+		caminho para ubuntu no windows -> ou acessar pelo explorer \\wsl$ 
+	
+Dicas:
+	- Para abrir o terminal do WSL basta digitar o nome da distribuição no menu Iniciar ou executar C:\Windows\System32\wsl.exe
+	- Execute o comando wsl -l -v com o PowerShell para ver as versões de Linux instaladas e seu status atual(parado ou rodando)
+	- Execute o comando wsl --shutdown com o PowerShell para desligar todas as distribuições Linux que estão rodando no momento 
+	(ao executar o comando, as distribuições do Docker também serão desligadas e o Docker Desktop mostrará uma notificação ao lado do relógio perguntando 
+	se você quer iniciar as distribuições dele novamente, se você não aceitar terá que iniciar o Docker novamente com o ícone perto do relógio do Windows).
+	- Se verificar que o WSL 2 está consumindo muitos recursos da máquina, execute os seguintes comandos dentro do terminal WSL 2 para liberar memória RAM:
+		echo 1 | sudo tee /proc/sys/vm/drop_caches
+	- Caso queira automatizar a inicialização do docker(pode-se iniciar outros serviços também), descrito na seção de desvantagens da utilização do docker nativo, 
+	enquanto não é inculído o wsl.conf, você pode configurar uma tarefa no windows para executar comandos no wsl, veja o tutorial a seguir
+		https://techbrij.com/wsl-2-ubuntu-services-windows-10-startup
+	- É possível acessar o sistema de arquivos do Linux pela rede do Windows, digite \\wsl$ no Windows Explorer.
+	- Erro intellij devido a versão de java não suportada:
+		https://stackoverflow.com/questions/25878045/errorjava-invalid-source-release-8-in-intellij-what-does-it-mean/26009627#26009627
+		
+
+---- STARTING KAFKA EACH TIME ----	
+Passo a passo para a linha de comando ubuntu:
+	First, stop Kafka and Zookeeper. Then run these commands on WSL2, one by one:
+		sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+		sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+	After that, in the kakfa folder, go to config/server.properties and edit the file to add the line:
+	For me.. C:\Users\denis\kafka\kafka_2.13-3.1.0\config
+		listeners=PLAINTEXT://localhost:9092
+	When these commands have succeeded relaunch zookeeper and kafka.
+	
+	sudo service docker start
+		Este comando acima terá que ser executado toda vez que Linux for reiniciado. Se caso o serviço do Docker não estiver executando, mostrará esta mensagem de erro ao rodar comando docker:
+		Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+	
+	Paulista77+
+		senha do ubuntu
+	
+	Comando para acessar a pasta do kafka:
+		cd kafka_2.13-3.1.0
+		
+	Comando vai inicializar o zookeeper:
+		~/kafka_2.13-3.1.0/bin/zookeeper-server-start.sh ~/kafka_2.13-3.1.0/config/zookeeper.properties
+		
+	Em um novo terminal, acesse a pasta do kafka: 
+		cd kafka_2.13-3.1.0
+	O kafka deve ser inicializado com esse comando: 
+		~/kafka_2.13-3.1.0/bin/kafka-server-start.sh ~/kafka_2.13-3.1.0/config/server.properties
+		** ambos terminais devem ficar abertos para que o kafka funcione **
+	
+	To end them: stop the consumer and producer clients with 
+		Ctrl+C
+	
+	issues with piv6: https://docs.conduktor.io/kafka-cluster-connection/setting-up-a-connection-to-kafka/connecting-to-kafka-running-on-windows-wsl-2
+
+---- USUAL COMMANDS ----
+kafka-topics.sh --bootstrap-server localhost:9092 --list
+	verifica os tópicos existentes
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
+	verifica quem (grupos) está escutando
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic topic_name_here
+	consome
+
+---- QUANDO ESTÁ NO SITE DA CONDUKTOR USAR ESTE COMANDO (https://kafkatraining.conduktor.app/home/my-playground) ----
+kafka-topics.sh --command-config playground.config --bootstrap-server cluster.playground.cdkt.io:9092 --list
+	eu usei dentro na pasta do kafka (cd kafka_2.13-3.1.0)
+
+---- LOCALHOST ----
+Conduktor: http://localhost:8080/
+	ADMIN_EMAIL: "admin@conduktor.io"
+    ADMIN_PSW: "admin"
+Opensearch: http://localhost:5601/  >go to DevTools
+
+
+https://github.com/conduktor/kafka-connect-wikimedia/releases
+	
